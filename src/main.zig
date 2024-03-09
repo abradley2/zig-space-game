@@ -105,7 +105,7 @@ pub fn main() !void {
             while (explosion_opt) |explosion_node| {
                 explosion_opt = explosion_node.next;
                 Explosion.AnimateSystem.onTick(&explosion_node.data);
-                explosion_node.data.onTick();
+                explosion_node.data.onTick(frames);
             }
         }
 
@@ -207,14 +207,17 @@ pub fn main() !void {
             var blaster_entity_opt = blaster_entities.list.first;
             while (blaster_entity_opt) |blaster_entity_node| {
                 blaster_entity_opt = blaster_entity_node.next;
+
+                if (blaster_entity_node.data.removed_at != null) continue;
+
                 var src_rect = blaster_entity_node.data.getSrcRect();
                 var dst_rect = camera.dstRectLens(blaster_entity_node.data.getDstRect());
                 if (dst_rect.y > 0) {
                     sdl.renderCopy(renderer, game_texture, &src_rect, &dst_rect);
                     continue;
                 }
-                const f = frames;
-                blaster_entity_node.data.removed_at = f;
+                if (blaster_entity_node.data.removed_at == null)
+                    blaster_entity_node.data.removed_at = frames;
             }
         }
 
@@ -222,6 +225,9 @@ pub fn main() !void {
             var enemy_fighter_opt = enemy_fighters.list.first;
             while (enemy_fighter_opt) |enemy_fighter_node| {
                 enemy_fighter_opt = enemy_fighter_node.next;
+
+                if (enemy_fighter_node.data.removed_at != null) continue;
+
                 var src_rect = enemy_fighter_node.data.getSrcRect();
                 var dst_rect = camera.dstRectLens(enemy_fighter_node.data.getDstRect());
                 const center = sdl.SDL_Point{ .x = 7, .y = 8 };
@@ -229,8 +235,8 @@ pub fn main() !void {
                     sdl.renderCopyEx(renderer, game_texture, &src_rect, &dst_rect, 180.0, &center);
                     continue;
                 }
-                const f = frames;
-                enemy_fighter_node.data.removed_at = f;
+                if (enemy_fighter_node.data.removed_at == null)
+                    enemy_fighter_node.data.removed_at = frames;
             }
         }
 
@@ -238,6 +244,9 @@ pub fn main() !void {
             var explosion_opt = explosions.list.first;
             while (explosion_opt) |explosion_node| {
                 explosion_opt = explosion_node.next;
+
+                if (explosion_node.data.removed_at != null) continue;
+
                 var src_rect = explosion_node.data.getSrcRect();
                 var dst_rect_1 = explosion_node.data.getDstRect();
                 dst_rect_1.y -= 5;
@@ -271,15 +280,18 @@ pub fn main() !void {
                         blaster_dst_rect.y < enemy_dst_rect.y + enemy_dst_rect.h and
                         blaster_dst_rect.y + blaster_dst_rect.h > enemy_dst_rect.y)
                     {
-                        enemy_fighter_node.data.alive = false;
-                        try explosions.addEntity(
-                            entity_gpa.allocator(),
-                            Explosion{
-                                .x_pos = enemy_fighter_node.data.x_pos,
-                                // set explosion y with camera offeset
-                                .y_pos = enemy_fighter_node.data.y_pos,
-                            },
-                        );
+                        if (enemy_fighter_node.data.removed_at == null) {
+                            enemy_fighter_node.data.removed_at = frames;
+
+                            try explosions.addEntity(
+                                entity_gpa.allocator(),
+                                Explosion{
+                                    .x_pos = enemy_fighter_node.data.x_pos,
+                                    // set explosion y with camera offeset
+                                    .y_pos = enemy_fighter_node.data.y_pos,
+                                },
+                            );
+                        }
                     }
                 }
             }

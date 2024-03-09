@@ -10,7 +10,6 @@ removed_at: ?u32 = null,
 
 x_pos: f32,
 y_pos: f32,
-alive: bool = true,
 current_animation_ticks: u16 = 0,
 current_animation_frame_idx: usize = 0,
 
@@ -85,9 +84,11 @@ pub fn hasAnimation(self: *Explosion) AnimationData {
     };
 }
 
-pub fn onTick(self: *Explosion) void {
+pub fn onTick(self: *Explosion, frames: u32) void {
     if (self.current_animation_frame_idx == self.src_rects.len - 1) {
-        self.alive = false;
+        if (self.removed_at == null) {
+            self.removed_at = frames;
+        }
     }
 }
 
