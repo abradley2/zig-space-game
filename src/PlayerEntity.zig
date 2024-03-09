@@ -5,6 +5,7 @@ const sdl = @import("./sdl.zig");
 const DstRect = @import("./DstRect.zig");
 const Controls = @import("./Controls.zig");
 const Camera = @import("./Camera.zig");
+const GameState = @import("./GameState.zig");
 
 const PlayerEntity = @This();
 
@@ -27,7 +28,7 @@ pub const Event: type = enum {
 
 pub const player_speed: f32 = 4.5;
 
-pub fn onTick(self: *PlayerEntity, controls: Controls) ?Event {
+pub fn onTick(self: *PlayerEntity, game_state: GameState, controls: Controls) ?Event {
     var event: ?Event = null;
     if (controls.left_key) {
         self.x_pos -= player_speed;
@@ -53,7 +54,11 @@ pub fn onTick(self: *PlayerEntity, controls: Controls) ?Event {
         self.fire_cooldown = 0;
     }
 
-    self.y_pos = self.y_pos - Camera.camera_scroll_speed;
+    if (game_state.rewind_start_tick == null) {
+        self.y_pos = self.y_pos - Camera.camera_scroll_speed;
+    } else {
+        self.y_pos = self.y_pos + Camera.camera_scroll_speed;
+    }
 
     return event;
 }

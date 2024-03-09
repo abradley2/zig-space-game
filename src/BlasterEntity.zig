@@ -72,8 +72,9 @@ pub fn getDstRect(self: *BlasterEntity) DstRect {
     };
 }
 
-pub fn new(x_pos: f32, y_pos: f32) BlasterEntity {
+pub fn new(game_state: GameState, x_pos: f32, y_pos: f32) BlasterEntity {
     return BlasterEntity{
+        .created_at = game_state.total_ticks,
         .current_ticks = 0,
         .current_frame = 0,
         .x_pos = x_pos,

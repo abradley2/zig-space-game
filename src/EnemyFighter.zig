@@ -1,4 +1,3 @@
-const std = @import("std");
 const sdl = @import("./sdl.zig");
 const components = @import("./components.zig");
 const AnimationData = components.AnimationData;

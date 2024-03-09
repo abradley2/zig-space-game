@@ -109,17 +109,17 @@ pub fn main() !void {
             }
         }
 
-        if (player_entity.onTick(controls)) |event| {
+        if (player_entity.onTick(game_state, controls)) |event| {
             switch (event) {
                 PlayerEntity.Event.FireBlaster => {
                     try blaster_entities.addEntity(
                         entity_gpa.allocator(),
-                        BlasterEntity.new(player_entity.x_pos, player_entity.y_pos),
+                        BlasterEntity.new(game_state, player_entity.x_pos, player_entity.y_pos),
                     );
 
                     try blaster_entities.addEntity(
                         entity_gpa.allocator(),
-                        BlasterEntity.new(player_entity.x_pos + 10, player_entity.y_pos),
+                        BlasterEntity.new(game_state, player_entity.x_pos + 10, player_entity.y_pos),
                     );
                 },
             }
@@ -131,6 +131,7 @@ pub fn main() !void {
                     try enemy_fighters.addEntity(
                         entity_gpa.allocator(),
                         EnemyFighter{
+                            .created_at = game_state.total_ticks,
                             .x_pos = x_pos,
                             .y_pos = camera.y_pos,
                         },
@@ -211,6 +212,9 @@ pub fn main() !void {
                 if (blaster_entity_node.data.removed_at) |removed_at| {
                     if (removed_at <= game_state.total_ticks) continue;
                 }
+                if (blaster_entity_node.data.created_at > game_state.total_ticks) {
+                    continue;
+                }
 
                 var src_rect = blaster_entity_node.data.getSrcRect();
                 var dst_rect = camera.dstRectLens(blaster_entity_node.data.getDstRect());
@@ -253,6 +257,10 @@ pub fn main() !void {
                     if (removed_at <= game_state.total_ticks) continue;
                 }
 
+                if (explosion_node.data.created_at > game_state.total_ticks) {
+                    continue;
+                }
+
                 var src_rect = explosion_node.data.getSrcRect();
                 var dst_rect_1 = explosion_node.data.getDstRect();
                 dst_rect_1.y -= 5;
@@ -293,6 +301,7 @@ pub fn main() !void {
                             try explosions.addEntity(
                                 entity_gpa.allocator(),
                                 Explosion{
+                                    .created_at = game_state.total_ticks,
                                     .x_pos = enemy_fighter_node.data.x_pos,
                                     // set explosion y with camera offeset
                                     .y_pos = enemy_fighter_node.data.y_pos,
