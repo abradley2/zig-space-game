@@ -30,7 +30,7 @@ pub fn EntityPool(
                 const removed_at_opt = impl.isRemovable(&entity_node.data).*;
 
                 if (removed_at_opt) |removed_at| {
-                    if (current_game_frame > removed_at + 60) {
+                    if (current_game_frame > removed_at + (60 * 5)) {
                         self.list.remove(entity_node);
                         alloc.destroy(entity_node);
                     }

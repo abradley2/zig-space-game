@@ -243,8 +243,9 @@ pub fn main() !void {
                     sdl.renderCopyEx(renderer, game_texture, &src_rect, &dst_rect, 180.0, &center);
                     continue;
                 }
-                if (enemy_fighter_node.data.removed_at == null)
+                if (enemy_fighter_node.data.removed_at == null) {
                     enemy_fighter_node.data.removed_at = game_state.total_ticks;
+                }
             }
         }
 
@@ -294,20 +295,18 @@ pub fn main() !void {
                         blaster_dst_rect.y < enemy_dst_rect.y + enemy_dst_rect.h and
                         blaster_dst_rect.y + blaster_dst_rect.h > enemy_dst_rect.y)
                     {
-                        if (enemy_fighter_node.data.removed_at == null and blaster_entity_node.data.removed_at == null) {
-                            enemy_fighter_node.data.removed_at = game_state.total_ticks;
-                            blaster_entity_node.data.removed_at = game_state.total_ticks;
+                        enemy_fighter_node.data.removed_at = game_state.total_ticks;
+                        blaster_entity_node.data.removed_at = game_state.total_ticks;
 
-                            try explosions.addEntity(
-                                entity_gpa.allocator(),
-                                Explosion{
-                                    .created_at = game_state.total_ticks,
-                                    .x_pos = enemy_fighter_node.data.x_pos,
-                                    // set explosion y with camera offeset
-                                    .y_pos = enemy_fighter_node.data.y_pos,
-                                },
-                            );
-                        }
+                        try explosions.addEntity(
+                            entity_gpa.allocator(),
+                            Explosion{
+                                .created_at = game_state.total_ticks,
+                                .x_pos = enemy_fighter_node.data.x_pos,
+                                // set explosion y with camera offeset
+                                .y_pos = enemy_fighter_node.data.y_pos,
+                            },
+                        );
                     }
                 }
             }

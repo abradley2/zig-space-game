@@ -16,7 +16,7 @@ pub fn onTick(self: *GameState, controls: Controls) void {
     std.debug.print("total_ticks: {} | rewind_start_tick: {?}\n", .{ self.total_ticks, self.rewind_start_tick });
 
     if (self.rewind_start_tick) |rewind_start_tick| {
-        if (rewind_start_tick > self.total_ticks + 120) {
+        if (rewind_start_tick > self.total_ticks + 60) {
             self.rewind_start_tick = null;
             return;
         }
