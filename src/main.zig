@@ -208,7 +208,9 @@ pub fn main() !void {
             while (blaster_entity_opt) |blaster_entity_node| {
                 blaster_entity_opt = blaster_entity_node.next;
 
-                if (blaster_entity_node.data.removed_at != null) continue;
+                if (blaster_entity_node.data.removed_at) |removed_at| {
+                    if (removed_at <= frames) continue;
+                }
 
                 var src_rect = blaster_entity_node.data.getSrcRect();
                 var dst_rect = camera.dstRectLens(blaster_entity_node.data.getDstRect());
@@ -226,7 +228,9 @@ pub fn main() !void {
             while (enemy_fighter_opt) |enemy_fighter_node| {
                 enemy_fighter_opt = enemy_fighter_node.next;
 
-                if (enemy_fighter_node.data.removed_at != null) continue;
+                if (enemy_fighter_node.data.removed_at) |removed_at| {
+                    if (removed_at <= frames) continue;
+                }
 
                 var src_rect = enemy_fighter_node.data.getSrcRect();
                 var dst_rect = camera.dstRectLens(enemy_fighter_node.data.getDstRect());
@@ -245,7 +249,9 @@ pub fn main() !void {
             while (explosion_opt) |explosion_node| {
                 explosion_opt = explosion_node.next;
 
-                if (explosion_node.data.removed_at != null) continue;
+                if (explosion_node.data.removed_at) |removed_at| {
+                    if (removed_at <= frames) continue;
+                }
 
                 var src_rect = explosion_node.data.getSrcRect();
                 var dst_rect_1 = explosion_node.data.getDstRect();
