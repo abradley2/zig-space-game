@@ -1,7 +1,7 @@
 const std = @import("std");
 const sdl = @import("./sdl.zig");
 const DstRect = @import("./DstRect.zig");
-
+const GameState = @import("./GameState.zig");
 const Camera = @This();
 
 x_pos: f32 = 0.0,
@@ -18,7 +18,11 @@ pub fn withYScrollOffset(self: Camera, y_offset: f32) Camera {
     };
 }
 
-pub fn onTick(self: *Camera) void {
+pub fn onTick(self: *Camera, game_state: GameState) void {
+    if (game_state.rewind_start_tick != null) {
+        self.y_pos = self.y_pos + Camera.camera_scroll_speed;
+        return;
+    }
     self.y_pos = self.y_pos - Camera.camera_scroll_speed;
 }
 

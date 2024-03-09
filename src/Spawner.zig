@@ -6,7 +6,7 @@ const Spawner = @This();
 age: u32 = 0,
 last_spawn: u32 = 0,
 
-const spawn_rate: u32 = 5;
+const spawn_rate: u32 = 20;
 var rand_impl = rand.DefaultPrng.init(42);
 
 pub const Event: type = union(enum) {

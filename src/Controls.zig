@@ -9,6 +9,8 @@ up_key: bool = false,
 down_key: bool = false,
 fire_key: bool = false,
 
+rewind_key: bool = false,
+
 pub fn handleKeydown(self: *Controls, key_code: sdl.SDL_Keycode) void {
     switch (key_code) {
         sdl.SDLK_a => self.left_key = true,
@@ -16,6 +18,7 @@ pub fn handleKeydown(self: *Controls, key_code: sdl.SDL_Keycode) void {
         sdl.SDLK_w => self.up_key = true,
         sdl.SDLK_s => self.down_key = true,
         sdl.SDLK_SPACE => self.fire_key = true,
+        sdl.SDLK_r => self.rewind_key = true,
         else => {},
     }
 }
@@ -27,6 +30,7 @@ pub fn handleKeyup(self: *Controls, key_code: sdl.SDL_Keycode) void {
         sdl.SDLK_w => self.up_key = false,
         sdl.SDLK_s => self.down_key = false,
         sdl.SDLK_SPACE => self.fire_key = false,
+        sdl.SDLK_r => self.rewind_key = false,
         else => {},
     }
 }

@@ -6,10 +6,12 @@ const sdl = @import("./sdl.zig");
 const components = @import("./components.zig");
 const systems = @import("./systems.zig");
 const DstRect = @import("./DstRect.zig");
+const GameState = @import("./GameState.zig");
 
 const BlasterEntity = @This();
 
 removed_at: ?u32 = null,
+created_at: u32,
 
 current_frame: usize,
 current_ticks: u16,
@@ -37,7 +39,12 @@ pub fn isRemovable(self: *BlasterEntity) *?u32 {
     return &self.removed_at;
 }
 
-pub fn onTick(self: *BlasterEntity) void {
+pub fn onTick(self: *BlasterEntity, game_state: GameState) void {
+    if (game_state.rewind_start_tick != null) {
+        self.y_pos = self.y_pos + blaster_speed;
+        return;
+    }
+
     self.y_pos = self.y_pos - blaster_speed;
 }
 

@@ -5,8 +5,10 @@ const AnimationData = components.AnimationData;
 const systems = @import("./systems.zig");
 const DstRect = @import("./DstRect.zig");
 const Explosion = @This();
+const GameState = @import("./GameState.zig");
 
 removed_at: ?u32 = null,
+created_at: u32,
 
 x_pos: f32,
 y_pos: f32,
@@ -84,10 +86,10 @@ pub fn hasAnimation(self: *Explosion) AnimationData {
     };
 }
 
-pub fn onTick(self: *Explosion, frames: u32) void {
+pub fn onTick(self: *Explosion, game_state: GameState) void {
     if (self.current_animation_frame_idx == self.src_rects.len - 1) {
         if (self.removed_at == null) {
-            self.removed_at = frames;
+            self.removed_at = game_state.total_ticks;
         }
     }
 }

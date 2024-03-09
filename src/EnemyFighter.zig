@@ -4,12 +4,14 @@ const components = @import("./components.zig");
 const AnimationData = components.AnimationData;
 const systems = @import("./systems.zig");
 const DstRect = @import("./DstRect.zig");
+const GameState = @import("./GameState.zig");
 
 const EnemyFighter = @This();
 
-const speed: f32 = 1.5;
+const speed: f32 = 0.5;
 
 removed_at: ?u32 = null,
+created_at: u32,
 
 alive: bool = true,
 x_pos: f32,
@@ -44,7 +46,11 @@ pub fn hasAnimation(self: *EnemyFighter) AnimationData {
     };
 }
 
-pub fn onTick(self: *EnemyFighter) void {
+pub fn onTick(self: *EnemyFighter, game_state: GameState) void {
+    if (game_state.rewind_start_tick != null) {
+        self.y_pos = self.y_pos - speed;
+        return;
+    }
     self.y_pos = self.y_pos + speed;
 }
 

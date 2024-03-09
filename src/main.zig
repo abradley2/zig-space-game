@@ -15,6 +15,7 @@ const Controls = @import("./Controls.zig");
 const Spawner = @import("./Spawner.zig");
 const Explosion = @import("./Explosion.zig");
 const systems = @import("./systems.zig");
+const GameState = @import("./GameState.zig");
 const EntityPool = systems.EntityPool;
 
 pub fn main() !void {
@@ -43,7 +44,7 @@ pub fn main() !void {
     }){};
 
     var camera = Camera{};
-
+    var game_state = GameState{};
     var spawner = Spawner{};
     var spawner_events: [5]Spawner.Event = undefined;
 
@@ -72,13 +73,12 @@ pub fn main() !void {
     sdl.setRenderSettings();
 
     var total_ticks = sdl.getTicks();
-    var frames: u32 = 0;
     while (run) {
+        game_state.onTick(controls);
         defer {
-            frames = frames + 1;
-            enemy_fighters.cleanupEntities(entity_gpa.allocator(), frames);
-            explosions.cleanupEntities(entity_gpa.allocator(), frames);
-            blaster_entities.cleanupEntities(entity_gpa.allocator(), frames);
+            enemy_fighters.cleanupEntities(entity_gpa.allocator(), game_state.total_ticks);
+            explosions.cleanupEntities(entity_gpa.allocator(), game_state.total_ticks);
+            blaster_entities.cleanupEntities(entity_gpa.allocator(), game_state.total_ticks);
         }
 
         const game_loop_start = sdl.getTicks();
@@ -89,7 +89,7 @@ pub fn main() !void {
             while (blaster_entity_opt) |blaster_entity_node| {
                 blaster_entity_opt = blaster_entity_node.next;
                 BlasterEntity.AnimateSystem.onTick(&blaster_entity_node.data);
-                blaster_entity_node.data.onTick();
+                blaster_entity_node.data.onTick(game_state);
             }
         }
         {
@@ -97,7 +97,7 @@ pub fn main() !void {
             while (enemy_fighter_opt) |enemy_fighter_node| {
                 enemy_fighter_opt = enemy_fighter_node.next;
                 EnemyFighter.AnimateSystem.onTick(&enemy_fighter_node.data);
-                enemy_fighter_node.data.onTick();
+                enemy_fighter_node.data.onTick(game_state);
             }
         }
         {
@@ -105,7 +105,7 @@ pub fn main() !void {
             while (explosion_opt) |explosion_node| {
                 explosion_opt = explosion_node.next;
                 Explosion.AnimateSystem.onTick(&explosion_node.data);
-                explosion_node.data.onTick(frames);
+                explosion_node.data.onTick(game_state);
             }
         }
 
@@ -166,7 +166,7 @@ pub fn main() !void {
             }
         }
 
-        camera.onTick();
+        camera.onTick(game_state);
 
         if (did_display == false) {
             cur_map_layers = try advanceTreadmill(
@@ -209,7 +209,7 @@ pub fn main() !void {
                 blaster_entity_opt = blaster_entity_node.next;
 
                 if (blaster_entity_node.data.removed_at) |removed_at| {
-                    if (removed_at <= frames) continue;
+                    if (removed_at <= game_state.total_ticks) continue;
                 }
 
                 var src_rect = blaster_entity_node.data.getSrcRect();
@@ -219,7 +219,7 @@ pub fn main() !void {
                     continue;
                 }
                 if (blaster_entity_node.data.removed_at == null)
-                    blaster_entity_node.data.removed_at = frames;
+                    blaster_entity_node.data.removed_at = game_state.total_ticks;
             }
         }
 
@@ -229,7 +229,7 @@ pub fn main() !void {
                 enemy_fighter_opt = enemy_fighter_node.next;
 
                 if (enemy_fighter_node.data.removed_at) |removed_at| {
-                    if (removed_at <= frames) continue;
+                    if (removed_at <= game_state.total_ticks) continue;
                 }
 
                 var src_rect = enemy_fighter_node.data.getSrcRect();
@@ -240,7 +240,7 @@ pub fn main() !void {
                     continue;
                 }
                 if (enemy_fighter_node.data.removed_at == null)
-                    enemy_fighter_node.data.removed_at = frames;
+                    enemy_fighter_node.data.removed_at = game_state.total_ticks;
             }
         }
 
@@ -250,7 +250,7 @@ pub fn main() !void {
                 explosion_opt = explosion_node.next;
 
                 if (explosion_node.data.removed_at) |removed_at| {
-                    if (removed_at <= frames) continue;
+                    if (removed_at <= game_state.total_ticks) continue;
                 }
 
                 var src_rect = explosion_node.data.getSrcRect();
@@ -286,8 +286,9 @@ pub fn main() !void {
                         blaster_dst_rect.y < enemy_dst_rect.y + enemy_dst_rect.h and
                         blaster_dst_rect.y + blaster_dst_rect.h > enemy_dst_rect.y)
                     {
-                        if (enemy_fighter_node.data.removed_at == null) {
-                            enemy_fighter_node.data.removed_at = frames;
+                        if (enemy_fighter_node.data.removed_at == null and blaster_entity_node.data.removed_at == null) {
+                            enemy_fighter_node.data.removed_at = game_state.total_ticks;
+                            blaster_entity_node.data.removed_at = game_state.total_ticks;
 
                             try explosions.addEntity(
                                 entity_gpa.allocator(),
