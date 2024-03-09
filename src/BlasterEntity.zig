@@ -9,7 +9,8 @@ const DstRect = @import("./DstRect.zig");
 
 const BlasterEntity = @This();
 
-is_alive: bool = true,
+removed_at: ?u32 = null,
+
 current_frame: usize,
 current_ticks: u16,
 x_pos: f32,
@@ -31,12 +32,13 @@ pub const src_rects: [2]sdl.SDL_Rect = .{
         .h = 10,
     },
 };
-pub fn onTick(self: *BlasterEntity) void {
-    self.y_pos = self.y_pos - blaster_speed;
+
+pub fn isRemovable(self: *BlasterEntity) *?u32 {
+    return &self.removed_at;
 }
 
-pub fn hasLifetime(self: *BlasterEntity) *bool {
-    return &self.is_alive;
+pub fn onTick(self: *BlasterEntity) void {
+    self.y_pos = self.y_pos - blaster_speed;
 }
 
 pub fn hasAnimation(self: *BlasterEntity) components.AnimationData {

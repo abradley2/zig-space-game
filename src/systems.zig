@@ -7,7 +7,7 @@ const components = @import("./components.zig");
 pub fn EntityPool(
     comptime T: anytype,
     comptime impl: struct {
-        hasLifetime: components.HasLifetime(T),
+        isRemovable: components.IsRemovable(T),
     },
 ) type {
     return struct {
@@ -22,17 +22,20 @@ pub fn EntityPool(
             self.list.prepend(next_entity_node);
         }
 
-        pub fn cleanupEntities(self: *Self, alloc: Allocator) void {
+        pub fn cleanupEntities(self: *Self, alloc: Allocator, current_game_frame: u32) void {
             var cur_entity_node = self.list.first;
             while (cur_entity_node) |entity_node| {
                 cur_entity_node = entity_node.next;
 
-                const is_alive = impl.hasLifetime(&entity_node.data).*;
+                const removed_at_opt = impl.isRemovable(&entity_node.data).*;
 
-                if (is_alive) continue;
-
-                self.list.remove(entity_node);
-                alloc.destroy(entity_node);
+                if (removed_at_opt) |removed_at| {
+                    std.debug.print("Removing entity at frame: {}\n", .{removed_at});
+                    if (removed_at > current_game_frame + (60 * 5)) {
+                        self.list.remove(entity_node);
+                        alloc.destroy(entity_node);
+                    }
+                }
             }
         }
     };

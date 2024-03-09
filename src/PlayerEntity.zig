@@ -8,6 +8,8 @@ const Camera = @import("./Camera.zig");
 
 const PlayerEntity = @This();
 
+const fire_cooldown_time: u8 = 5;
+
 x_pos: f32,
 y_pos: f32,
 alloc: Allocator,
@@ -42,7 +44,7 @@ pub fn onTick(self: *PlayerEntity, controls: Controls) ?Event {
 
     if (controls.fire_key) {
         if (self.fire_cooldown == 0) {
-            self.fire_cooldown = 10;
+            self.fire_cooldown = fire_cooldown_time;
             event = PlayerEntity.Event.FireBlaster;
         } else {
             self.fire_cooldown = self.fire_cooldown - 1;

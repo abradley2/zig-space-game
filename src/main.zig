@@ -33,13 +33,13 @@ pub fn main() !void {
     const game_texture = try sdl.textureFromSurface(renderer, surface);
 
     var blaster_entities = EntityPool(BlasterEntity, .{
-        .hasLifetime = BlasterEntity.hasLifetime,
+        .isRemovable = BlasterEntity.isRemovable,
     }){};
     var enemy_fighters = EntityPool(EnemyFighter, .{
-        .hasLifetime = EnemyFighter.hasLifetime,
+        .isRemovable = EnemyFighter.isRemovable,
     }){};
     var explosions = EntityPool(Explosion, .{
-        .hasLifetime = Explosion.hasLifetime,
+        .isRemovable = Explosion.isRemovable,
     }){};
 
     var camera = Camera{};
@@ -72,11 +72,13 @@ pub fn main() !void {
     sdl.setRenderSettings();
 
     var total_ticks = sdl.getTicks();
+    var frames: u32 = 0;
     while (run) {
         defer {
-            enemy_fighters.cleanupEntities(entity_gpa.allocator());
-            explosions.cleanupEntities(entity_gpa.allocator());
-            blaster_entities.cleanupEntities(entity_gpa.allocator());
+            frames = frames + 1;
+            enemy_fighters.cleanupEntities(entity_gpa.allocator(), frames);
+            explosions.cleanupEntities(entity_gpa.allocator(), frames);
+            blaster_entities.cleanupEntities(entity_gpa.allocator(), frames);
         }
 
         const game_loop_start = sdl.getTicks();
@@ -211,7 +213,8 @@ pub fn main() !void {
                     sdl.renderCopy(renderer, game_texture, &src_rect, &dst_rect);
                     continue;
                 }
-                blaster_entity_node.data.is_alive = false;
+                const f = frames;
+                blaster_entity_node.data.removed_at = f;
             }
         }
 
@@ -226,7 +229,8 @@ pub fn main() !void {
                     sdl.renderCopyEx(renderer, game_texture, &src_rect, &dst_rect, 180.0, &center);
                     continue;
                 }
-                enemy_fighter_node.data.alive = false;
+                const f = frames;
+                enemy_fighter_node.data.removed_at = f;
             }
         }
 

@@ -17,6 +17,6 @@ pub fn HasDstRect(comptime T: anytype) type {
     return fn (self: *T) *sdl.SDL_Rect;
 }
 
-pub fn HasLifetime(comptime T: anytype) type {
-    return fn (self: *T) *bool;
+pub fn IsRemovable(comptime T: anytype) type {
+    return fn (self: *T) *?u32;
 }

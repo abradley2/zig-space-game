@@ -7,6 +7,10 @@ const DstRect = @import("./DstRect.zig");
 
 const EnemyFighter = @This();
 
+const speed: f32 = 1.5;
+
+removed_at: ?u32 = null,
+
 alive: bool = true,
 x_pos: f32,
 y_pos: f32,
@@ -27,8 +31,8 @@ src_rects: [2]sdl.SDL_Rect = .{
     },
 },
 
-pub fn hasLifetime(self: *EnemyFighter) *bool {
-    return &self.alive;
+pub fn isRemovable(self: *EnemyFighter) *?u32 {
+    return &self.removed_at;
 }
 
 pub fn hasAnimation(self: *EnemyFighter) AnimationData {
@@ -41,7 +45,7 @@ pub fn hasAnimation(self: *EnemyFighter) AnimationData {
 }
 
 pub fn onTick(self: *EnemyFighter) void {
-    self.y_pos = self.y_pos + 0.5;
+    self.y_pos = self.y_pos + speed;
 }
 
 pub fn getSrcRect(self: *EnemyFighter) sdl.SDL_Rect {

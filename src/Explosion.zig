@@ -6,6 +6,8 @@ const systems = @import("./systems.zig");
 const DstRect = @import("./DstRect.zig");
 const Explosion = @This();
 
+removed_at: ?u32 = null,
+
 x_pos: f32,
 y_pos: f32,
 alive: bool = true,
@@ -57,8 +59,8 @@ src_rects: [7]sdl.SDL_Rect = .{
     },
 },
 
-pub fn hasLifetime(self: *Explosion) *bool {
-    return &self.alive;
+pub fn isRemovable(self: *Explosion) *?u32 {
+    return &self.removed_at;
 }
 
 pub fn getSrcRect(self: *Explosion) sdl.SDL_Rect {
